@@ -5,7 +5,7 @@ import { contact } from '../schemas/contactsSchemas.js'
 const contactsPath = path.resolve('db', 'contacts.json');
 
 
-
+// Отримання всіх контактів
 async function listContacts() {
     try {
         const readContacts = await contact.find()
@@ -18,7 +18,7 @@ async function listContacts() {
     
 }
 
-
+//Отримання одного контакта 
 async function getContactById(contactId) {
     try {
         const Contacts = await contact.findById(contactId)
@@ -28,7 +28,7 @@ async function getContactById(contactId) {
         return error;
     }
 }
-
+// Видалення контакта
 async function removeContact(contactId) {
     try {
         
@@ -39,7 +39,7 @@ async function removeContact(contactId) {
         return error;
     }
 }
-
+// Створення нового контакта
 async function addContact(name, email, phone) {
     try {
        const newContact = await contact.create({ name, email, phone });
@@ -50,6 +50,7 @@ async function addContact(name, email, phone) {
         return error;
   }
 }
+// Оновленя старого контакта по id
 async function editContact(id, updateData) {
     try {      
         const updatedContact = await contact.findByIdAndUpdate(id, updateData, { new: true });
@@ -58,6 +59,7 @@ async function editContact(id, updateData) {
         return error;
     }
 }
+// Додавання статусу кантакта
 async function updateStatus(contactId, body) {
     try {
         const upContact = await contact.findByIdAndUpdate(contactId, body, { new: true })

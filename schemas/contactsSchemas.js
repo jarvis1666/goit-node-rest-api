@@ -5,7 +5,6 @@ export const createContactSchema = Joi.object({
     name: Joi.string().required(),
     email: Joi.string().required(),
     phone: Joi.string().required(),
-    favorite: Joi.boolean()
 
 })
 
@@ -13,9 +12,11 @@ export const updateContactSchema = Joi.object({
     name: Joi.string(),
     email: Joi.string(),
     phone: Joi.string(),
-    favorite: Joi.boolean(),
+    
 })
-
+export const updateContactFavoriteShema = Joi.object({
+    favorite: Joi.boolean().required(),
+})
 
 const contactShema = new Schema({
     name: {
@@ -33,6 +34,6 @@ const contactShema = new Schema({
         type: Boolean,
         default: false,
     },
-})
+}, { versionKey: false })
 
 export const  contact = model('contact', contactShema)
