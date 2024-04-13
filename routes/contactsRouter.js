@@ -27,6 +27,6 @@ contactsRouter.post("/", validateBody(createContactSchema), createContact);
 contactsRouter.put("/:id", validateBody(updateContactSchema), updateContact);
 
 // Додавання статусу кантакта
-contactsRouter.patch("/:id/favorite", validateBody(updateContactFavoriteShema), updateContactStatus )
+contactsRouter.patch("/:id/favorite", validateBody(updateContactFavoriteShema), updateContactStatus)
 
 export default contactsRouter;
