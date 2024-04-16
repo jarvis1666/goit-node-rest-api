@@ -8,6 +8,10 @@ export const registerUserShema = Joi.object({
     token: Joi.string(),
 })
 
+export const loginUserShema = Joi.object({
+  password: Joi.string().required(),
+  email: Joi.string().required(),
+})
 const usersShema = new Schema({
     password: {
     type: String,

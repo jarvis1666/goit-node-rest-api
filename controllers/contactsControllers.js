@@ -1,12 +1,19 @@
 
-import {listContacts, getContactById, removeContact, addContact, editContact, updateStatus}  from '../services/contactsServices.js'
+import {listContacts, getContactByUserId, removeContact, addContact, editContact, updateStatus}  from '../services/contactsServices.js'
 import HttpError from '../helpers/HttpError.js';
 import { json } from 'express';
 import mongoose from 'mongoose'
+import { checkToken } from '../services/jwtServise.js';
 // Отримання всіх контактів
 export const getAllContacts = async (req, res, next) => {
     try {
-        const contacts = await listContacts();
+        const token = req.headers.authorization?.startsWith('Bearer') && req.headers.authorization.split(' ')[1];
+        const userId = checkToken(token)
+    
+        if (!userId) {
+             throw HttpError(401, 'Uanauthorize... ')
+        }
+        const contacts = await listContacts(userId);
         res.status(200).json(contacts);
     } catch (error) {
         next(error);
@@ -14,12 +21,14 @@ export const getAllContacts = async (req, res, next) => {
 };
 //Отримання одного контакта 
 export const getOneContact = async (req, res, next) => {
-    const { id } = req.params;
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-        return res.status(400).json({ message: 'Invalid ID' });
-    }
+    const token = req.headers.authorization?.startsWith('Bearer') && req.headers.authorization.split(' ')[1];
+        const userId = checkToken(token)
+    
+        if (!userId) {
+             throw HttpError(401, 'Uanauthorize... ')
+        }
     try {
-        const contact = await getContactById(id);
+        const contact = await getContactByUserId(userId);
         if (!contact) {
             throw  HttpError(404, 'Contact not found');
         }
@@ -30,13 +39,20 @@ export const getOneContact = async (req, res, next) => {
     }
 };
 // Видалення контакта
-export const deleteContact = async(req, res, next) => {
+export const deleteContact = async (req, res, next) => {
     const { id } = req.params;
     if (!mongoose.Types.ObjectId.isValid(id)) {
         return res.status(400).json({ message: 'Invalid ID' });
     }
+    const token = req.headers.authorization?.startsWith('Bearer') && req.headers.authorization.split(' ')[1];
+        const userId = checkToken(token)
+    
+        if (!userId) {
+             throw HttpError(401, 'Uanauthorize... ')
+        }
+
     try {
-        const removedContact = await removeContact(id);
+        const removedContact = await removeContact(id, userId);
         if (!removedContact) {
             throw  HttpError(404);
         }
@@ -47,9 +63,15 @@ export const deleteContact = async(req, res, next) => {
 };
 // Створення нового контакта
 export const createContact = async (req, res, next) => {
+     const token = req.headers.authorization?.startsWith('Bearer') && req.headers.authorization.split(' ')[1];
+        const userId = checkToken(token)
+    
+        if (!userId) {
+             throw HttpError(401, 'Uanauthorize... ')
+        }
     const { name, email, phone } = req.body;
     try {
-        const newContact = await addContact(name, email, phone);
+        const newContact = await addContact(name, email, phone, userId);
         if (!newContact) {
             throw  HttpError(404, error.message);
         }
@@ -60,6 +82,12 @@ export const createContact = async (req, res, next) => {
 };
 // Оновленя старого контакта по id
 export const updateContact = async (req, res, next) => {
+    const token = req.headers.authorization?.startsWith('Bearer') && req.headers.authorization.split(' ')[1];
+    const userId = checkToken(token)
+    
+        if (!userId) {
+             throw HttpError(401, 'Uanauthorize... ')
+        }
     const { id } = req.params;
     const { name, email, phone } = req.body;
 
@@ -72,7 +100,7 @@ export const updateContact = async (req, res, next) => {
     }
 
     try {
-        const updatedContact = await editContact(id, { name, email, phone });
+        const updatedContact = await editContact(id, { name, email, phone, owner: userId }, userId);
         
         if (!updatedContact) {
            throw  HttpError(404);
@@ -84,6 +112,12 @@ export const updateContact = async (req, res, next) => {
 };
 // Додавання статусу кантакта
 export const updateContactStatus = async (req, res, next) => {
+    const token = req.headers.authorization?.startsWith('Bearer') && req.headers.authorization.split(' ')[1];
+    const userId = checkToken(token)
+    
+        if (!userId) {
+             throw HttpError(401, 'Uanauthorize... ')
+        }
     const { id } = req.params;
     const { favorite } = req.body;
 
@@ -92,7 +126,7 @@ export const updateContactStatus = async (req, res, next) => {
     }
 
     try {
-        const newContact = await updateStatus(id, { favorite })
+        const newContact = await updateStatus(id, { favorite, owner: userId })
         if (!newContact) {
             throw HttpError(404);
         }
