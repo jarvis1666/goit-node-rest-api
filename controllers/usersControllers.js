@@ -54,7 +54,7 @@ export const loginUserData = async (req, res, next) => {
             throw  HttpError(401, 'Uanauthorize... ')
         }
 
-        const loginUser = await loginOldUser(email, password, existingUser);
+        const loginUser = await loginOldUser(email, password, existingUser, next);
         // console.log(loginUser)
         if (!loginUser) {
             throw HttpError(404, error.message);

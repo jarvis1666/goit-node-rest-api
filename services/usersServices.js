@@ -19,7 +19,7 @@ async function registerNewUser(email, password, subscription, token) {
 }
 
 //Логінення користувача
-async function loginOldUser(email, password, existingUser) {
+async function loginOldUser(email, password, existingUser, next) {
     try {
         const isPasswordValid = await bcrypt.compare(password, existingUser.password);
         if (!isPasswordValid) {
@@ -37,7 +37,7 @@ async function loginOldUser(email, password, existingUser) {
             }
         };
     } catch (error) {
-        return error;
+        next(error)
     }
 }
 
