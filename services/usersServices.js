@@ -23,7 +23,7 @@ async function loginOldUser(email, password, existingUser) {
     try {
         const isPasswordValid = await bcrypt.compare(password, existingUser.password);
         if (!isPasswordValid) {
-              return HttpError(401)
+              throw HttpError(401, 'Uanauthorize...')
         }
         
         const token = singToken(existingUser._id);
