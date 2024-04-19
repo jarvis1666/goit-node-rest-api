@@ -20,12 +20,9 @@ async function listContacts(userId) {
 }
 
 //Отримання одного контакта 
-async function getContactByUserId(userId, userOwner) {
+async function getContactByUserId(contactId, userId) {
     try {
-        const Contacts = await listContacts(userOwner)
-        // console.log(userId)
-        // console.log(userOwner)
-        const Contact = await Contacts.find(userId)
+        const Contact = await contact.find({_id: contactId, owner: userId})
         
         return Contact || null;
 

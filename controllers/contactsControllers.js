@@ -13,6 +13,7 @@ export const getAllContacts = async (req, res, next) => {
         const contacts = await listContacts(currentUser._id);
         res.status(200).json(contacts);
     } catch (error) {
+        
         next(error);
     }
 };
@@ -21,10 +22,9 @@ export const getOneContact = async (req, res, next) => {
     const { id } = req.params;
     try {
         const currentUser = await getUserForToken(req)
-        console.log(currentUser)
 
-        const contact = await getContactByUserId(id, currentUser.owner);
-        // console.log(contact)
+        const contact = await getContactByUserId(id, currentUser._id);
+       
         if (!contact) {
             throw  HttpError(404, 'Contact not found');
         }
