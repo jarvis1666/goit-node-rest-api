@@ -2,7 +2,7 @@
 import bcrypt from 'bcrypt';
 import HttpError from '../helpers/HttpError.js';
 import { user } from '../schemas/usersSchema.js';
-
+import {checkToken} from '../services/jwtServise.js'
 import { singToken } from '../services/jwtServise.js'
 
 //Регістрація користувача
@@ -17,13 +17,32 @@ async function registerNewUser(email, password, subscription, token) {
         return error;
     }
 }
+//Отримання токену
+async function getUserForToken(req) {
+    try {
+        const token = req.headers.authorization?.startsWith('Bearer') && req.headers.authorization.split(' ')[1];
+        const userId = checkToken(token)
+        
+        if (!userId) {
+             throw HttpError(401, 'Email or password is wrong')
+        }
+        const currentUser = await user.findById(userId)
+        // console.log(currentUser)
+        if (!currentUser) {
+            throw HttpError(401, 'Email or password is wrong')
+        }
+        return currentUser;
+    } catch (error) {
+        return(error)
+    }
+}
 
 //Логінення користувача
 async function loginOldUser(email, password, existingUser, next) {
     try {
         const isPasswordValid = await bcrypt.compare(password, existingUser.password);
         if (!isPasswordValid) {
-              throw HttpError(401, 'Uanauthorize...')
+              throw HttpError(401, 'Email or password is wrong')
         }
         
         const token = singToken(existingUser._id);
@@ -58,4 +77,5 @@ export {
     registerNewUser,
     loginOldUser,
     logoutUser,
+    getUserForToken,
 }

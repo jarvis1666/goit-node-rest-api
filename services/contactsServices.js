@@ -1,5 +1,6 @@
 import path from 'path'
 import { contact } from '../schemas/contactsSchemas.js'
+import { user } from '../schemas/usersSchema.js';
 
 
 const contactsPath = path.resolve('db', 'contacts.json');
@@ -19,10 +20,14 @@ async function listContacts(userId) {
 }
 
 //Отримання одного контакта 
-async function getContactByUserId(userId) {
+async function getContactByUserId(userId, userOwner) {
     try {
-        const Contacts = await contact.find({owner: userId })
-        return Contacts || null;
+        const Contacts = await listContacts(userOwner)
+        // console.log(userId)
+        // console.log(userOwner)
+        const Contact = await Contacts.find(userId)
+        
+        return Contact || null;
 
     } catch (error) {
         return error;

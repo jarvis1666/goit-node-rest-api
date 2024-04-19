@@ -1,9 +1,10 @@
 
-import {registerNewUser, loginOldUser, logoutUser} from '../services/usersServices.js'
+import {registerNewUser, loginOldUser, logoutUser, getUserForToken} from '../services/usersServices.js'
 import  HttpError  from '../helpers/HttpError.js';
 import { user } from '../schemas/usersSchema.js';
 import { checkToken} from '../services/jwtServise.js'
 import { response } from 'express';
+
 
 
 
@@ -51,7 +52,7 @@ export const loginUserData = async (req, res, next) => {
         const existingUser = await user.findOne({ email });
         // console.log(existingUser);
         if (!existingUser) {
-            throw  HttpError(401, 'Uanauthorize... ')
+            throw  HttpError(401, 'Email or password is wrong ')
         }
 
         const loginUser = await loginOldUser(email, password, existingUser, next);
@@ -68,19 +69,19 @@ export const loginUserData = async (req, res, next) => {
 //Отримання та перевірка юзера по токену та id
 export const userToken = async (req, res, next) => {
     try {
-        const token = req.headers.authorization?.startsWith('Bearer') && req.headers.authorization.split(' ')[1];
-        const userId = checkToken(token)
+        // const token = req.headers.authorization?.startsWith('Bearer') && req.headers.authorization.split(' ')[1];
+        const currentUser = await getUserForToken(req)
+     
         // console.log(token)
         // console.log(userId)
-        if (!userId) {
-             throw HttpError(401, 'Uanauthorize... ')
-        }
-        const currentUser = await user.findById(userId)
+    
+        // const currentUser = await user.findById(userId)
         // console.log(currentUser)
-        if (!currentUser) {
-            throw HttpError(401, 'Uanauthorize...')
-        }
+        // if (!currentUser) {
+        //     throw HttpError(401, 'Email or password is wrong')
+        // }
         req.user = currentUser;
+        
         const responseCurrentUser = {
             email: currentUser.email,
             subscription: currentUser.subscription
