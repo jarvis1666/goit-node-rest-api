@@ -11,12 +11,12 @@ export const singToken =  ( _id) =>
 //Пепевірка токена для подальшого використовування
 export const checkToken = (token) => {
     if (!token) {
-        throw HttpError(401, 'Email or password is wrong')
+        throw HttpError(401, 'Not authorized')
     }
     try {
         const { _id } = jwt.verify(token, process.env.JWT_SECRET_KEY)
         return _id;
     } catch (error) {
-         throw HttpError(401, 'Email or password is wrong')
+         throw HttpError(401, 'Not authorized')
     }
 }
