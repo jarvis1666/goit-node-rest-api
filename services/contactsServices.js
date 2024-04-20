@@ -1,6 +1,8 @@
 import path from 'path'
 import { contact } from '../schemas/contactsSchemas.js'
 import { user } from '../schemas/usersSchema.js';
+import HttpError from '../helpers/HttpError.js';
+import { updateContact } from '../controllers/contactsControllers.js';
 
 
 const contactsPath = path.resolve('db', 'contacts.json');
@@ -53,18 +55,19 @@ async function addContact(name, email, phone, userId) {
   }
 }
 // Оновленя старого контакта по id
-async function editContact(id, updateData) {
+async function editContact(id, updateData, owner) {
     try {      
-        const updatedContact = await contact.findByIdAndUpdate(id, updateData, { new: true });
+        const updatedContact = await contact.findByIdAndUpdate(id, updateData, owner, { new: true });
+   
         return updatedContact;
     } catch (error) {
         return error;
     }
 }
 // Додавання статусу кантакта
-async function updateStatus(contactId, body) {
+async function updateStatus(contactId, body, owner) {
     try {
-        const upContact = await contact.findByIdAndUpdate(contactId, body, { new: true })
+        const upContact = await contact.findByIdAndUpdate(contactId, body, owner, { new: true })
         return upContact
     } catch (error) {
         return error;

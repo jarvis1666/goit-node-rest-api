@@ -13,7 +13,7 @@ export const getAllContacts = async (req, res, next) => {
         const contacts = await listContacts(currentUser._id);
         res.status(200).json(contacts);
     } catch (error) {
-        
+
         next(error);
     }
 };
@@ -70,6 +70,7 @@ export const updateContact = async (req, res, next) => {
     
     const { id } = req.params;
     const { name, email, phone } = req.body;
+    const currentUser = await getUserForToken(req)
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
         return res.status(400).json({ message: 'Invalid ID' });
@@ -80,7 +81,7 @@ export const updateContact = async (req, res, next) => {
     }
 
     try {
-        const updatedContact = await editContact(id, { name, email, phone});
+        const updatedContact = await editContact(id, { name, email, phone}, currentUser._id);
         
         if (!updatedContact) {
            throw  HttpError(404);
@@ -94,13 +95,13 @@ export const updateContact = async (req, res, next) => {
 export const updateContactStatus = async (req, res, next) => {
     const { id } = req.params;
     const { favorite } = req.body;
-
+    const currentUser = await getUserForToken(req)
     if (!mongoose.Types.ObjectId.isValid(id)) {
         return res.status(400).json({ message: 'Invalid ID' });
     }
 
     try {
-        const newContact = await updateStatus(id, { favorite })
+        const newContact = await updateStatus(id, { favorite}, currentUser._id)
         if (!newContact) {
             throw HttpError(404);
         }
