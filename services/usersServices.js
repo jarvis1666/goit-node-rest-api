@@ -4,6 +4,7 @@ import HttpError from '../helpers/HttpError.js';
 import { user } from '../schemas/usersSchema.js';
 import {checkToken} from '../services/jwtServise.js'
 import { singToken } from '../services/jwtServise.js'
+import { token } from 'morgan';
 
 //Регістрація користувача
 async function registerNewUser(email, password, subscription, token) {
@@ -69,6 +70,7 @@ async function logoutUser(userId) {
         }
 
         await user.findByIdAndUpdate(userId, { token: null })
+        
     } catch (error) {
         return error;
     }

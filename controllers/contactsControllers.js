@@ -23,10 +23,13 @@ export const getOneContact = async (req, res, next) => {
     try {
         const currentUser = await getUserForToken(req)
 
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(400).json({ message: 'Invalid ID' });
+    }
         const contact = await getContactByUserId(id, currentUser._id);
        
         if (!contact) {
-            throw  HttpError(404, 'Contact not found');
+            throw  HttpError(404, 'Contact not found!');
         }
         res.status(200).json(contact);
     } catch (error) {
@@ -46,6 +49,7 @@ export const deleteContact = async (req, res, next) => {
         if (!removedContact) {
             throw  HttpError(404);
         }
+        
         res.status(200).json(removedContact);
     } catch (error) {
         next(error);

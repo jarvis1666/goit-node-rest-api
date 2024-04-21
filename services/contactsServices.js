@@ -1,8 +1,6 @@
 import path from 'path'
 import { contact } from '../schemas/contactsSchemas.js'
-import { user } from '../schemas/usersSchema.js';
-import HttpError from '../helpers/HttpError.js';
-import { updateContact } from '../controllers/contactsControllers.js';
+
 
 
 const contactsPath = path.resolve('db', 'contacts.json');
@@ -24,8 +22,8 @@ async function listContacts(userId) {
 //Отримання одного контакта 
 async function getContactByUserId(contactId, userId) {
     try {
-        const Contact = await contact.find({_id: contactId, owner: userId})
-        
+        const Contact = await contact.findOne({_id: contactId, owner: userId})
+       
         return Contact || null;
 
     } catch (error) {
@@ -55,9 +53,9 @@ async function addContact(name, email, phone, userId) {
   }
 }
 // Оновленя старого контакта по id
-async function editContact(id, updateData, owner) {
+async function editContact(id,  contactData, owner) {
     try {      
-        const updatedContact = await contact.findByIdAndUpdate(id, updateData, owner, { new: true });
+        const updatedContact = await contact.findOneAndUpdate({ _id: id, owner: owner }, contactData, { new: true });
    
         return updatedContact;
     } catch (error) {
@@ -67,7 +65,7 @@ async function editContact(id, updateData, owner) {
 // Додавання статусу кантакта
 async function updateStatus(contactId, body, owner) {
     try {
-        const upContact = await contact.findByIdAndUpdate(contactId, body, owner, { new: true })
+        const upContact = await contact.findOneAndUpdate({ _id: contactId, owner: owner }, body,  { new: true })
         return upContact
     } catch (error) {
         return error;

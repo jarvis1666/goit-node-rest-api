@@ -69,17 +69,9 @@ export const loginUserData = async (req, res, next) => {
 //Отримання та перевірка юзера по токену та id
 export const userToken = async (req, res, next) => {
     try {
-        // const token = req.headers.authorization?.startsWith('Bearer') && req.headers.authorization.split(' ')[1];
+    
         const currentUser = await getUserForToken(req)
      
-        // console.log(token)
-        // console.log(userId)
-    
-        // const currentUser = await user.findById(userId)
-        // console.log(currentUser)
-        // if (!currentUser) {
-        //     throw HttpError(401, 'Email or password is wrong')
-        // }
         req.user = currentUser;
         
         const responseCurrentUser = {
@@ -95,7 +87,7 @@ export const userToken = async (req, res, next) => {
 // Логаут користувача
 export const logoutUserData = async (req, res, next) => {
     try {
-        const token = req.headers.authorization?.startsWith('Bearer') && req.headers.authorization.split(' ')[1];
+        let token = req.headers.authorization?.startsWith('Bearer') && req.headers.authorization.split(' ')[1];
         const userId = checkToken(token)
     
         if (!userId) {
@@ -108,9 +100,9 @@ export const logoutUserData = async (req, res, next) => {
             throw HttpError(401, 'Invalid token');
         }
 
-       console.log(foundUser);
-        await logoutUser(userId);
-
+       
+        req.user = await logoutUser(userId);
+        // res.cookie('token', null, { expires: new Date(0) });
 
         res.status(204).end();
     } catch (error) {
