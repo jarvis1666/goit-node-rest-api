@@ -29,15 +29,15 @@ async function getUserForToken(req) {
         if (!userId) {
              throw HttpError(401, 'Email or password is wrong')
         }
-        const currentUser = await user.findOne({_id: userId, token: token })
-        console.log(currentUser)
+        const currentUser = await user.findById(userId)
+        // console.log(currentUser)
         if (!currentUser) {
             throw HttpError(401, 'Email or password is wrong')
         }
         
-        // if (currentUser.token !== token) {
-        //     throw HttpError(401, 'Invalid token');
-        // }
+        if (currentUser.token !== token) {
+            throw HttpError(401, 'Invalid token');
+        }
 
         return currentUser;
     } catch (error) {
