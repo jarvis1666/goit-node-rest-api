@@ -19,7 +19,7 @@ async function registerNewUser(email, password, subscription, token) {
     }
 }
 //Отримання токену
-async function getUserForToken(req) {
+async function getUserForToken(req, next) {
     try {
 
         const token = req.headers.authorization?.startsWith('Bearer') && req.headers.authorization.split(' ')[1];
@@ -41,7 +41,7 @@ async function getUserForToken(req) {
 
         return currentUser;
     } catch (error) {
-        return(error)
+       next(error)
     }
 }
 

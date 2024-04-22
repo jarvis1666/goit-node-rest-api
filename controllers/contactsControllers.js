@@ -8,7 +8,7 @@ import { getUserForToken } from '../services/usersServices.js'
 // Отримання всіх контактів
 export const getAllContacts = async (req, res, next) => {
     try {
-        const currentUser = await getUserForToken(req);
+        const currentUser = await getUserForToken(req, next);
         // console.log(currentUser)
         const contacts = await listContacts(currentUser._id);
         res.status(200).json(contacts);
@@ -21,7 +21,7 @@ export const getAllContacts = async (req, res, next) => {
 export const getOneContact = async (req, res, next) => {
     const { id } = req.params;
     try {
-        const currentUser = await getUserForToken(req)
+        const currentUser = await getUserForToken(req, next)
 
         if (!mongoose.Types.ObjectId.isValid(id)) {
         return res.status(400).json({ message: 'Invalid ID' });
@@ -44,7 +44,7 @@ export const deleteContact = async (req, res, next) => {
         return res.status(400).json({ message: 'Invalid ID' });
     }
     try {
-        const currentUser = await getUserForToken(req)
+        const currentUser = await getUserForToken(req, next)
         const removedContact = await removeContact(id, currentUser._id);
         if (!removedContact) {
             throw  HttpError(404);
@@ -59,7 +59,7 @@ export const deleteContact = async (req, res, next) => {
 export const createContact = async (req, res, next) => {
     const { name, email, phone } = req.body;
     try {
-        const currentUser = await getUserForToken(req)
+        const currentUser = await getUserForToken(req, next)
         const newContact = await addContact(name, email, phone, currentUser._id);
         if (!newContact) {
             throw  HttpError(404, error.message);
@@ -74,7 +74,7 @@ export const updateContact = async (req, res, next) => {
     
     const { id } = req.params;
     const { name, email, phone } = req.body;
-    const currentUser = await getUserForToken(req)
+    const currentUser = await getUserForToken(req, next)
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
         return res.status(400).json({ message: 'Invalid ID' });
@@ -99,7 +99,7 @@ export const updateContact = async (req, res, next) => {
 export const updateContactStatus = async (req, res, next) => {
     const { id } = req.params;
     const { favorite } = req.body;
-    const currentUser = await getUserForToken(req)
+    const currentUser = await getUserForToken(req, next)
     if (!mongoose.Types.ObjectId.isValid(id)) {
         return res.status(400).json({ message: 'Invalid ID' });
     }

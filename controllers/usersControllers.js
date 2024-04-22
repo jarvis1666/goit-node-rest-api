@@ -70,7 +70,7 @@ export const loginUserData = async (req, res, next) => {
 export const userToken = async (req, res, next) => {
     try {
     
-        const currentUser = await getUserForToken(req)
+        const currentUser = await getUserForToken(req, next)
      
         req.user = currentUser;
         
