@@ -21,17 +21,24 @@ async function registerNewUser(email, password, subscription, token) {
 //Отримання токену
 async function getUserForToken(req) {
     try {
+
         const token = req.headers.authorization?.startsWith('Bearer') && req.headers.authorization.split(' ')[1];
+        console.log(token)
         const userId = checkToken(token)
         
         if (!userId) {
              throw HttpError(401, 'Email or password is wrong')
         }
-        const currentUser = await user.findById(userId)
-        // console.log(currentUser)
+        const currentUser = await user.findOne({_id: userId, token: token })
+        console.log(currentUser)
         if (!currentUser) {
             throw HttpError(401, 'Email or password is wrong')
         }
+        
+        // if (currentUser.token !== token) {
+        //     throw HttpError(401, 'Invalid token');
+        // }
+
         return currentUser;
     } catch (error) {
         return(error)
