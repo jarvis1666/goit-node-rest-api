@@ -2,8 +2,9 @@
 import {registerNewUser, loginOldUser, logoutUser, getUserForToken} from '../services/usersServices.js'
 import  HttpError  from '../helpers/HttpError.js';
 import { user } from '../schemas/usersSchema.js';
-import { checkToken} from '../services/jwtServise.js'
-import { response } from 'express';
+import { checkToken } from '../services/jwtServise.js'
+import {ImegeServise} from '../services/imageServises.js'
+
 
 
 
@@ -100,12 +101,14 @@ export const logoutUserData = async (req, res, next) => {
             throw HttpError(401, 'Invalid token');
         }
 
-       
         req.user = await logoutUser(userId);
-        // res.cookie('token', null, { expires: new Date(0) });
-
+      
         res.status(204).end();
     } catch (error) {
         next(error);
     }
 };
+//Оновлення аватару
+
+
+export const uploadAvatar = ImegeServise.initUploadImageMiddlewre('avatarURL')

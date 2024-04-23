@@ -4,15 +4,19 @@ import HttpError from '../helpers/HttpError.js';
 import { user } from '../schemas/usersSchema.js';
 import {checkToken} from '../services/jwtServise.js'
 import { singToken } from '../services/jwtServise.js'
-import { token } from 'morgan';
+import { url } from 'gravatar';
+import { ImegeServise } from './imageServises.js';
 
 //Регістрація користувача
 async function registerNewUser(email, password, subscription, token) {
     try {
         const hashedPassword = await bcrypt.hash(password, 10);
+        const avatarURL =`http:${url(email)}?d=robohash`
+       console.log(avatarURL)
+        const newUser = await user.create({ email, password: hashedPassword, avatarURL, subscription, token });
 
-        const newUser = await user.create({ email, password: hashedPassword, subscription, token });
-       
+        
+        
         return newUser;
     } catch (error) {
         return error;
@@ -82,9 +86,29 @@ async function logoutUser(userId) {
         return error;
     }
 }
+////Оновлення аватару
+async function avaratData(userData, user, file) {
+    if (file) {
+        user.avatarURL = await ImegeServise.saveImage(
+            file,
+            {
+                maxFileSize: 2,
+                width: 200,
+                height: 200,
+            }
+        )
+    }
+    Object.keys(userData).forEach((key) => {
+    user[key] = userData[key];
+  });
+
+  return user.save();
+
+}
 export {
     registerNewUser,
     loginOldUser,
     logoutUser,
     getUserForToken,
+    avaratData,
 }
