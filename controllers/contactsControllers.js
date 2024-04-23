@@ -1,27 +1,35 @@
 
-import {listContacts, getContactById, removeContact, addContact, editContact, updateStatus}  from '../services/contactsServices.js'
+import {listContacts, getContactByUserId, removeContact, addContact, editContact, updateStatus}  from '../services/contactsServices.js'
 import HttpError from '../helpers/HttpError.js';
 import { json } from 'express';
 import mongoose from 'mongoose'
+import { checkToken } from '../services/jwtServise.js';
+import { getUserForToken } from '../services/usersServices.js'
 // Отримання всіх контактів
 export const getAllContacts = async (req, res, next) => {
     try {
-        const contacts = await listContacts();
+        const currentUser = await getUserForToken(req, next);
+        // console.log(currentUser)
+        const contacts = await listContacts(currentUser._id);
         res.status(200).json(contacts);
     } catch (error) {
+
         next(error);
     }
 };
 //Отримання одного контакта 
 export const getOneContact = async (req, res, next) => {
     const { id } = req.params;
-    if (!mongoose.Types.ObjectId.isValid(id)) {
+    try {
+        const currentUser = await getUserForToken(req, next)
+
+        if (!mongoose.Types.ObjectId.isValid(id)) {
         return res.status(400).json({ message: 'Invalid ID' });
     }
-    try {
-        const contact = await getContactById(id);
+        const contact = await getContactByUserId(id, currentUser._id);
+       
         if (!contact) {
-            throw  HttpError(404, 'Contact not found');
+            throw  HttpError(404, 'Contact not found!');
         }
         res.status(200).json(contact);
     } catch (error) {
@@ -30,16 +38,18 @@ export const getOneContact = async (req, res, next) => {
     }
 };
 // Видалення контакта
-export const deleteContact = async(req, res, next) => {
+export const deleteContact = async (req, res, next) => {
     const { id } = req.params;
     if (!mongoose.Types.ObjectId.isValid(id)) {
         return res.status(400).json({ message: 'Invalid ID' });
     }
     try {
-        const removedContact = await removeContact(id);
+        const currentUser = await getUserForToken(req, next)
+        const removedContact = await removeContact(id, currentUser._id);
         if (!removedContact) {
             throw  HttpError(404);
         }
+        
         res.status(200).json(removedContact);
     } catch (error) {
         next(error);
@@ -49,7 +59,8 @@ export const deleteContact = async(req, res, next) => {
 export const createContact = async (req, res, next) => {
     const { name, email, phone } = req.body;
     try {
-        const newContact = await addContact(name, email, phone);
+        const currentUser = await getUserForToken(req, next)
+        const newContact = await addContact(name, email, phone, currentUser._id);
         if (!newContact) {
             throw  HttpError(404, error.message);
         }
@@ -60,8 +71,10 @@ export const createContact = async (req, res, next) => {
 };
 // Оновленя старого контакта по id
 export const updateContact = async (req, res, next) => {
+    
     const { id } = req.params;
     const { name, email, phone } = req.body;
+    const currentUser = await getUserForToken(req, next)
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
         return res.status(400).json({ message: 'Invalid ID' });
@@ -72,7 +85,7 @@ export const updateContact = async (req, res, next) => {
     }
 
     try {
-        const updatedContact = await editContact(id, { name, email, phone });
+        const updatedContact = await editContact(id, { name, email, phone}, currentUser._id);
         
         if (!updatedContact) {
            throw  HttpError(404);
@@ -86,13 +99,13 @@ export const updateContact = async (req, res, next) => {
 export const updateContactStatus = async (req, res, next) => {
     const { id } = req.params;
     const { favorite } = req.body;
-
+    const currentUser = await getUserForToken(req, next)
     if (!mongoose.Types.ObjectId.isValid(id)) {
         return res.status(400).json({ message: 'Invalid ID' });
     }
 
     try {
-        const newContact = await updateStatus(id, { favorite })
+        const newContact = await updateStatus(id, { favorite}, currentUser._id)
         if (!newContact) {
             throw HttpError(404);
         }

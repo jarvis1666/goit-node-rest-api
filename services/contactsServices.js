@@ -2,13 +2,14 @@ import path from 'path'
 import { contact } from '../schemas/contactsSchemas.js'
 
 
+
 const contactsPath = path.resolve('db', 'contacts.json');
 
 
 // Отримання всіх контактів
-async function listContacts() {
+async function listContacts(userId) {
     try {
-        const readContacts = await contact.find()
+        const readContacts = await contact.find({owner: userId})
         
         return readContacts;
        
@@ -19,20 +20,21 @@ async function listContacts() {
 }
 
 //Отримання одного контакта 
-async function getContactById(contactId) {
+async function getContactByUserId(contactId, userId) {
     try {
-        const Contacts = await contact.findById(contactId)
-        return Contacts || null;
+        const Contact = await contact.findOne({_id: contactId, owner: userId})
+       
+        return Contact || null;
 
     } catch (error) {
         return error;
     }
 }
 // Видалення контакта
-async function removeContact(contactId) {
+async function removeContact(contactId, userId) {
     try {
         
-        const removedContact = await contact.findByIdAndDelete(contactId);
+        const removedContact = await contact.findOneAndDelete({_id: contactId, owner: userId });
         return removedContact || null;
 
     } catch (error) {
@@ -40,9 +42,9 @@ async function removeContact(contactId) {
     }
 }
 // Створення нового контакта
-async function addContact(name, email, phone) {
+async function addContact(name, email, phone, userId) {
     try {
-       const newContact = await contact.create({ name, email, phone });
+       const newContact = await contact.create({ owner: userId, name, email, phone });
         return newContact;
 
       
@@ -51,18 +53,19 @@ async function addContact(name, email, phone) {
   }
 }
 // Оновленя старого контакта по id
-async function editContact(id, updateData) {
+async function editContact(id,  contactData, owner) {
     try {      
-        const updatedContact = await contact.findByIdAndUpdate(id, updateData, { new: true });
+        const updatedContact = await contact.findOneAndUpdate({ _id: id, owner: owner }, contactData, { new: true });
+   
         return updatedContact;
     } catch (error) {
         return error;
     }
 }
 // Додавання статусу кантакта
-async function updateStatus(contactId, body) {
+async function updateStatus(contactId, body, owner) {
     try {
-        const upContact = await contact.findByIdAndUpdate(contactId, body, { new: true })
+        const upContact = await contact.findOneAndUpdate({ _id: contactId, owner: owner }, body,  { new: true })
         return upContact
     } catch (error) {
         return error;
@@ -70,7 +73,7 @@ async function updateStatus(contactId, body) {
 }
 export {
     listContacts,
-    getContactById,
+    getContactByUserId,
     removeContact,
     addContact,
     editContact,
