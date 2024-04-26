@@ -1,8 +1,8 @@
 import express from "express";
-import { registerUserData, loginUserData, logoutUserData, userToken, uploadAvatar } from '../controllers/usersControllers.js'
+import { registerUserData, loginUserData, logoutUserData, userToken, updateAvatar } from '../controllers/usersControllers.js'
 import { registerUserShema, loginUserShema } from '../schemas/usersSchema.js'
 import { validateBody } from '../helpers/validateBody.js'
-import { avaratData } from "../services/usersServices.js";
+import  upload  from '../services/imageServises.js'
 
 
 
@@ -22,7 +22,7 @@ usersRouter.get("/current", userToken)
 usersRouter.post("/logout", logoutUserData, userToken)
 
 //Оновлення аватарки
-usersRouter.patch("/avatars", uploadAvatar,  avaratData)
+usersRouter.patch("/avatars", upload.single("avatarURL"), updateAvatar)
 
 
 export default usersRouter;

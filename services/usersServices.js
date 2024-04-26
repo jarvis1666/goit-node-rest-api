@@ -5,7 +5,12 @@ import { user } from '../schemas/usersSchema.js';
 import {checkToken} from '../services/jwtServise.js'
 import { singToken } from '../services/jwtServise.js'
 import { url } from 'gravatar';
-import { ImegeServise } from './imageServises.js';
+import { fileURLToPath } from 'url';
+import path from 'path'
+import fs from 'fs/promises';
+import { v4 as uuidv4 } from 'uuid';
+import Jimp from 'jimp'; 
+
 
 //Регістрація користувача
 async function registerNewUser(email, password, subscription, token) {
@@ -27,9 +32,9 @@ async function getUserForToken(req, next) {
     try {
 
         const token = req.headers.authorization?.startsWith('Bearer') && req.headers.authorization.split(' ')[1];
-        console.log(token)
+      
         const userId = checkToken(token)
-        
+       
         if (!userId) {
              throw HttpError(401, 'Email or password is wrong')
         }
@@ -86,29 +91,11 @@ async function logoutUser(userId) {
         return error;
     }
 }
-////Оновлення аватару
-async function avaratData(userData, user, file) {
-    if (file) {
-        user.avatarURL = await ImegeServise.saveImage(
-            file,
-            {
-                maxFileSize: 2,
-                width: 200,
-                height: 200,
-            }
-        )
-    }
-    Object.keys(userData).forEach((key) => {
-    user[key] = userData[key];
-  });
 
-  return user.save();
 
-}
 export {
     registerNewUser,
     loginOldUser,
     logoutUser,
     getUserForToken,
-    avaratData,
 }

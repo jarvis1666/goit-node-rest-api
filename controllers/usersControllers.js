@@ -3,9 +3,11 @@ import {registerNewUser, loginOldUser, logoutUser, getUserForToken} from '../ser
 import  HttpError  from '../helpers/HttpError.js';
 import { user } from '../schemas/usersSchema.js';
 import { checkToken } from '../services/jwtServise.js'
-import {ImegeServise} from '../services/imageServises.js'
+// import fs from 'fs/promises';
+import path from 'path'
+import { promises as fs } from "fs";
 
-
+import Jimp from "jimp";
 
 
 
@@ -108,7 +110,40 @@ export const logoutUserData = async (req, res, next) => {
         next(error);
     }
 };
+
+
+const avatarsDir = path.join(new URL(import.meta.url).pathname, "../../", "public", "avatars");
+
+
 //Оновлення аватару
+export const updateAvatar = async (req, res, next) => {
+    try {
+        const { path: tempUpload, originalname } = req.file;
+    
+        const currentUser = await getUserForToken(req, next)
+        if (!currentUser) {
+            return;
+        }
+        const { _id } = currentUser;
+   
+        const avatarRenamed = `${_id}_${originalname}`;
+        const resultUpload = path.join(avatarsDir, avatarRenamed);
+       Jimp.read(`${tempUpload}`, async (err, avatarRenamed) => {
+           if (err) {
+               throw err;
+           };
+            await avatarRenamed
+                .resize(250, 250) 
+                .write(`${tempUpload}`);
+            await fs.rename(tempUpload, resultUpload);
+        });
+    
 
+    const avatarURL = path.join("avatars", avatarRenamed);
+    await user.findByIdAndUpdate(_id, { avatarURL });
 
-export const uploadAvatar = ImegeServise.initUploadImageMiddlewre('avatarURL')
+    res.json({ avatarURL });
+  } catch (error) {
+    next(error)
+  }
+};
