@@ -118,8 +118,11 @@ const avatarsDir = path.join(new URL(import.meta.url).pathname, "../../", "publi
 //Оновлення аватару
 export const updateAvatar = async (req, res, next) => {
     try {
+        if (!req.file) {
+            return res.status(400).json({message: "Avatar not found!"})
+        }
         const { path: tempUpload, originalname } = req.file;
-    
+        
         const currentUser = await getUserForToken(req, next)
         if (!currentUser) {
             return;
