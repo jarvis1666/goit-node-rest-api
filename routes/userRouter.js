@@ -22,7 +22,7 @@ usersRouter.get("/current", userToken)
 usersRouter.post("/logout", logoutUserData, userToken)
 
 //Оновлення аватарки
-usersRouter.patch("/avatars", upload.single("avatarURL"), updateAvatar)
+usersRouter.patch("/avatars", upload.single("avatar"), updateAvatar)
 
 
 export default usersRouter;
