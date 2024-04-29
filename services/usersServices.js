@@ -5,7 +5,7 @@ import { user } from '../schemas/usersSchema.js';
 import {checkToken} from '../services/jwtServise.js'
 import { singToken } from '../services/jwtServise.js'
 import { url } from 'gravatar';
-import { fileURLToPath } from 'url';
+
 import path from 'path'
 import fs from 'fs/promises';
 import { v4 as uuidv4 } from 'uuid';

@@ -5,7 +5,7 @@ import path from "path";
 //Отримання шляху до поточної директорії
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
-const tempDir = path.join(__dirname, "../", "../", "tmp");
+const tempDir = path.join(__dirname, "..", "tmp");
 
 const multerConfig = multer.diskStorage({
   destination: tempDir,

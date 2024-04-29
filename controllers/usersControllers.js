@@ -3,10 +3,9 @@ import {registerNewUser, loginOldUser, logoutUser, getUserForToken} from '../ser
 import  HttpError  from '../helpers/HttpError.js';
 import { user } from '../schemas/usersSchema.js';
 import { checkToken } from '../services/jwtServise.js'
-// import fs from 'fs/promises';
 import path from 'path'
 import { promises as fs } from "fs";
-
+import { fileURLToPath } from 'url';
 import Jimp from "jimp";
 
 
@@ -111,8 +110,9 @@ export const logoutUserData = async (req, res, next) => {
     }
 };
 
-
-const avatarsDir = path.join(new URL(import.meta.url).pathname, "../../", "public", "avatars");
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+const avatarsDir = path.join(__dirname, "../", "public", "avatars");
 
 
 //Оновлення аватару
@@ -131,15 +131,21 @@ export const updateAvatar = async (req, res, next) => {
    
         const avatarRenamed = `${_id}_${originalname}`;
         const resultUpload = path.join(avatarsDir, avatarRenamed);
-       Jimp.read(`${tempUpload}`, async (err, avatarRenamed) => {
-           if (err) {
-               throw err;
-           };
-            await avatarRenamed
-                .resize(250, 250) 
-                .write(`${tempUpload}`);
-            await fs.rename(tempUpload, resultUpload);
-        });
+        
+        await fs.rename(tempUpload, resultUpload)
+        const avatar = await Jimp.read(resultUpload);
+        const resizeAvatar = await avatar.resize(250, 250);
+        await resizeAvatar.write(resultUpload);
+
+    //         Jimp.read(`${tempUpload}`, async (err, avatarRenamed) => {
+    //        if (err) {
+    //            throw err;
+    //        };
+    //         await avatarRenamed
+    //             .resize(250, 250) 
+    //             .write(`${tempUpload}`);
+    //         await fs.rename(tempUpload, resultUpload);
+    //     });
     
 
     const avatarURL = path.join("avatars", avatarRenamed);
