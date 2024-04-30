@@ -1,6 +1,6 @@
 import express from "express";
-import { registerUserData, loginUserData, logoutUserData, userToken, updateAvatar } from '../controllers/usersControllers.js'
-import { registerUserShema, loginUserShema } from '../schemas/usersSchema.js'
+import { registerUserData, loginUserData, logoutUserData, userToken, updateAvatar, getUserforVerificationToken, reVerification } from '../controllers/usersControllers.js'
+import { registerUserShema, loginUserShema, reVerificationShema } from '../schemas/usersSchema.js'
 import { validateBody } from '../helpers/validateBody.js'
 import  upload  from '../services/imageServises.js'
 
@@ -24,5 +24,10 @@ usersRouter.post("/logout", logoutUserData, userToken)
 //Оновлення аватарки
 usersRouter.patch("/avatars", upload.single("avatar"), updateAvatar)
 
+//Отримання користувача по verificationToken
+usersRouter.get("/verify/:verificationToken", getUserforVerificationToken)
+
+//повторна відправка email користувачу з посиланням для верифікації
+usersRouter.post("/verify",validateBody(reVerificationShema), reVerification)
 
 export default usersRouter;
