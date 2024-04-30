@@ -2,9 +2,11 @@
 import {registerNewUser, loginOldUser, logoutUser, getUserForToken} from '../services/usersServices.js'
 import  HttpError  from '../helpers/HttpError.js';
 import { user } from '../schemas/usersSchema.js';
-import { checkToken} from '../services/jwtServise.js'
-import { response } from 'express';
-
+import { checkToken } from '../services/jwtServise.js'
+import path from 'path'
+import { promises as fs } from "fs";
+import { fileURLToPath } from 'url';
+import Jimp from "jimp";
 
 
 
@@ -100,12 +102,57 @@ export const logoutUserData = async (req, res, next) => {
             throw HttpError(401, 'Invalid token');
         }
 
-       
         req.user = await logoutUser(userId);
-        // res.cookie('token', null, { expires: new Date(0) });
-
+      
         res.status(204).end();
     } catch (error) {
         next(error);
     }
+};
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+const avatarsDir = path.join(__dirname, "../", "public", "avatars");
+
+
+//Оновлення аватару
+export const updateAvatar = async (req, res, next) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({message: "Avatar not found!"})
+        }
+        const { path: tempUpload, originalname } = req.file;
+        
+        const currentUser = await getUserForToken(req, next)
+        if (!currentUser) {
+            return;
+        }
+        const { _id } = currentUser;
+   
+        const avatarRenamed = `${_id}_${originalname}`;
+        const resultUpload = path.join(avatarsDir, avatarRenamed);
+        
+        await fs.rename(tempUpload, resultUpload)
+        const avatar = await Jimp.read(resultUpload);
+        const resizeAvatar = await avatar.resize(250, 250);
+        await resizeAvatar.write(resultUpload);
+
+    //         Jimp.read(`${tempUpload}`, async (err, avatarRenamed) => {
+    //        if (err) {
+    //            throw err;
+    //        };
+    //         await avatarRenamed
+    //             .resize(250, 250) 
+    //             .write(`${tempUpload}`);
+    //         await fs.rename(tempUpload, resultUpload);
+    //     });
+    
+
+    const avatarURL = path.join("avatars", avatarRenamed);
+    await user.findByIdAndUpdate(_id, { avatarURL });
+
+    res.json({ avatarURL });
+  } catch (error) {
+    next(error)
+  }
 };

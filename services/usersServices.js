@@ -4,15 +4,24 @@ import HttpError from '../helpers/HttpError.js';
 import { user } from '../schemas/usersSchema.js';
 import {checkToken} from '../services/jwtServise.js'
 import { singToken } from '../services/jwtServise.js'
-import { token } from 'morgan';
+import { url } from 'gravatar';
+
+import path from 'path'
+import fs from 'fs/promises';
+import { v4 as uuidv4 } from 'uuid';
+import Jimp from 'jimp'; 
+
 
 //Регістрація користувача
 async function registerNewUser(email, password, subscription, token) {
     try {
         const hashedPassword = await bcrypt.hash(password, 10);
+        const avatarURL =`http:${url(email)}?d=robohash`
+       console.log(avatarURL)
+        const newUser = await user.create({ email, password: hashedPassword, avatarURL, subscription, token });
 
-        const newUser = await user.create({ email, password: hashedPassword, subscription, token });
-       
+        
+        
         return newUser;
     } catch (error) {
         return error;
@@ -23,9 +32,9 @@ async function getUserForToken(req, next) {
     try {
 
         const token = req.headers.authorization?.startsWith('Bearer') && req.headers.authorization.split(' ')[1];
-        console.log(token)
+      
         const userId = checkToken(token)
-        
+       
         if (!userId) {
              throw HttpError(401, 'Email or password is wrong')
         }
@@ -82,6 +91,8 @@ async function logoutUser(userId) {
         return error;
     }
 }
+
+
 export {
     registerNewUser,
     loginOldUser,
