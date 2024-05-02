@@ -153,9 +153,9 @@ export const updateAvatar = async (req, res, next) => {
 export const getUserforVerificationToken = async (req, res, next) => {
     try {
         const { verificationToken } = req.params;
-        const OneVerificationToken = verificationToken.slice(1)
+        // const OneVerificationToken = verificationToken.slice(1)
       
-        const userPoVerificationToken = await user.findOne({verificationToken: OneVerificationToken });
+        const userPoVerificationToken = await user.findOne({verificationToken: verificationToken});
         
         if (!userPoVerificationToken) {
             throw HttpError(404, "User not found!")
@@ -164,7 +164,7 @@ export const getUserforVerificationToken = async (req, res, next) => {
         // console.log(userPoVerificationToken)
         userPoVerificationToken.verificationToken = null;
         userPoVerificationToken.verify = true;
-        await user.updateOne({verificationToken: OneVerificationToken}, {verificationToken: userPoVerificationToken.verificationToken, verify: userPoVerificationToken.verify})
+        await user.updateOne({verificationToken: verificationToken}, {verificationToken: userPoVerificationToken.verificationToken, verify: userPoVerificationToken.verify})
          
          return res.status(200).json({ message: 'User verified successfully' });
     } catch (error) {
