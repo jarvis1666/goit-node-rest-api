@@ -104,8 +104,8 @@ async function sendEmail(email, verificationToken) {
             to: email,
             from: process.env.EMAIL_FROM,
             subject: 'Sending with SendGrid is Fun',
-            text: `Регістрація пройшла успішно! Ваше посилання для верифікації emaila ( http://localhost:3000/api/users/verify/:${verificationToken})`,
-            html: `<strong>Регістрація пройшла успішно! Ваше посилання для верифікації email ( http://localhost:3000/api/users/verify/:${verificationToken})</strong>`,
+            text: `Регістрація пройшла успішно! Ваше посилання для верифікації emaila ( http://localhost:3000/api/users/verify/${verificationToken})`,
+            html: `<strong>Регістрація пройшла успішно! Ваше посилання для верифікації email ( http://localhost:3000/api/users/verify/${verificationToken})</strong>`,
         };
 
         sgMail
