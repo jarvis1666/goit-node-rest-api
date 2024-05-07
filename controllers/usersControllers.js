@@ -1,5 +1,5 @@
 
-import {registerNewUser, loginOldUser, logoutUser, getUserForToken} from '../services/usersServices.js'
+import {registerNewUser, loginOldUser, logoutUser, getUserForToken, sendEmail} from '../services/usersServices.js'
 import  HttpError  from '../helpers/HttpError.js';
 import { user } from '../schemas/usersSchema.js';
 import { checkToken } from '../services/jwtServise.js'
@@ -7,6 +7,9 @@ import path from 'path'
 import { promises as fs } from "fs";
 import { fileURLToPath } from 'url';
 import Jimp from "jimp";
+import { v4 as uuidv4 } from 'uuid';
+
+
 
 
 
@@ -131,22 +134,11 @@ export const updateAvatar = async (req, res, next) => {
    
         const avatarRenamed = `${_id}_${originalname}`;
         const resultUpload = path.join(avatarsDir, avatarRenamed);
-        
+
         await fs.rename(tempUpload, resultUpload)
         const avatar = await Jimp.read(resultUpload);
         const resizeAvatar = await avatar.resize(250, 250);
-        await resizeAvatar.write(resultUpload);
-
-    //         Jimp.read(`${tempUpload}`, async (err, avatarRenamed) => {
-    //        if (err) {
-    //            throw err;
-    //        };
-    //         await avatarRenamed
-    //             .resize(250, 250) 
-    //             .write(`${tempUpload}`);
-    //         await fs.rename(tempUpload, resultUpload);
-    //     });
-    
+        await resizeAvatar.write(resultUpload);  
 
     const avatarURL = path.join("avatars", avatarRenamed);
     await user.findByIdAndUpdate(_id, { avatarURL });
@@ -156,3 +148,51 @@ export const updateAvatar = async (req, res, next) => {
     next(error)
   }
 };
+//Отримання користувача по verificationToken та веріфікація
+
+export const getUserforVerificationToken = async (req, res, next) => {
+    try {
+        const { verificationToken } = req.params;
+        // const OneVerificationToken = verificationToken.slice(1)
+      
+        const userPoVerificationToken = await user.findOne({verificationToken: verificationToken});
+        
+        if (!userPoVerificationToken) {
+            throw HttpError(404, "User not found!")
+        }
+        
+        // console.log(userPoVerificationToken)
+        userPoVerificationToken.verificationToken = null;
+        userPoVerificationToken.verify = true;
+        await user.updateOne({verificationToken: verificationToken}, {verificationToken: userPoVerificationToken.verificationToken, verify: userPoVerificationToken.verify})
+         
+         return res.status(200).json({ message: 'User verified successfully' });
+    } catch (error) {
+        next(error)
+    }
+}
+//повторна відправка email користувачу з посиланням для верифікації
+export const reVerification = async (req, res, next) => {
+    try {
+        const { email } = req.body;
+        
+        if (!email) {
+            return res.status(400).json({message:"missing required field email"})
+        }
+        const userForReVerification = await user.findOne({ email })
+        if (!userForReVerification) {
+            throw HttpError(404, 'User not found!')
+        }
+        if (userForReVerification.verify === true) {
+            return res.status(400).json({message:"Verification has already been passed"})
+        }
+        const verificationToken = uuidv4(); 
+        // console.log(userForReVerification);
+        await sendEmail(email, verificationToken);
+        const userUpdate = await user.findOneAndUpdate({email}, {verificationToken})
+        
+        return res.status(200).json({message: "Verification email sent"});
+    } catch (error) {
+        next(error)
+    }
+}
